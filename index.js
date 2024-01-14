@@ -57,3 +57,16 @@ function displayFilmDetails(films) {
     main.innerHTML = filmDetails;
   });
 }
+
+function buyTicket(filmId, availableTickets) {
+  const films = movies.filter((movie) => movie.id == filmId);
+  films.map((film) => {
+    if (availableTickets > 0) {
+      const updatedAvailableTickets = availableTickets - 1;
+      const tickets = document.querySelector(".tickets");
+      tickets.innerHTML = `Available Tickets: ${updatedAvailableTickets}`;
+    } else {
+      console.log("No available tickets");
+    }
+  });
+}
