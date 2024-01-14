@@ -65,6 +65,22 @@ function buyTicket(filmId, availableTickets) {
       const updatedAvailableTickets = availableTickets - 1;
       const tickets = document.querySelector(".tickets");
       tickets.innerHTML = `Available Tickets: ${updatedAvailableTickets}`;
+      fetch(`${filmsUrl}films/${filmId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tickets_sold: film.tickets_sold + 1,
+        }),
+      })
+        .then((res) => res.json())
+        .then((updatedFilm) => {
+          tickets.innerHTML = `Available Tickets: ${updatedFilm.availableTickets}`;
+        })
+        .catch((error) => {
+          console.error("Error updating ticket information:", error.message);
+        });
     } else {
       console.log("No available tickets");
     }
