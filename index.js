@@ -55,6 +55,11 @@ function displayFilmDetails(films) {
           </div>
       </div>`;
     main.innerHTML = filmDetails;
+
+    if (availableTickets === 0) {
+      const button = document.querySelector("button");
+      button.innerText = "Sold Out";
+    }
   });
 }
 
@@ -81,8 +86,14 @@ function buyTicket(filmId, availableTickets) {
         .catch((error) => {
           console.error("Error updating ticket information:", error.message);
         });
+      if (updatedAvailableTickets === 0) {
+        const button = document.querySelector("button");
+        button.innerText = "Sold Out";
+      }
     } else {
-      console.log("No available tickets");
+      const button = document.querySelector("button");
+      button.innerText = "Sold Out";
+      alert("Sorry, this showing is sold out.");
     }
   });
 }
