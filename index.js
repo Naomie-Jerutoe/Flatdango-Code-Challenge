@@ -11,7 +11,14 @@ function getAndDisplayFilms() {
       movies = films;
       films.forEach((film) => {
         const filmList = document.createElement("li");
-        filmList.innerHTML = `<a href="#" onclick="displayDetails(${film.id})">${film.title}</a>`;
+        filmList.innerHTML = `<span data-film-id="${film.id}">
+        <a href="#" onclick="displayDetails(${film.id})">${film.title}</a>
+        <button onclick="deleteFilm(${film.id})">X</button>
+        <span>`;
+
+        if (film.capacity - film.tickets_sold === 0) {
+          filmList.classList.add("sold-out");
+        }
         ul.appendChild(filmList);
       });
     })
@@ -21,6 +28,28 @@ function getAndDisplayFilms() {
 }
 
 getAndDisplayFilms();
+
+function deleteFilm(filmId) {
+  fetch(`${filmsUrl}films/${filmId}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (res.ok) {
+        // Remove the film from the UI
+        const filmListItem = document.querySelector(
+          `li span[data-film-id="${filmId}"]`
+        );
+        if (filmListItem) {
+          filmListItem.parentElement.remove();
+        }
+      } else {
+        console.error("Failed to delete film from the server");
+      }
+    })
+    .catch((error) => {
+      console.error("Error deleting film:", error.message);
+    });
+}
 
 function getandDisplayOneFilm() {
   fetch(`${filmsUrl}films/1`)
@@ -51,7 +80,7 @@ function displayFilmDetails(films) {
               <h3>Runtime: ${film.runtime}</h3>
               <h3>Showtime: ${film.showtime}</h3>
               <h3 class="tickets">Available Tickets: ${availableTickets}</h3>
-              <button onclick="buyTicket(${film.id}, ${availableTickets})">Buy Ticket</button>
+              <button type="button" onclick="buyTicket(${film.id}, ${availableTickets})">Buy Ticket</button>
           </div>
       </div>`;
     main.innerHTML = filmDetails;
@@ -66,10 +95,13 @@ function displayFilmDetails(films) {
 function buyTicket(filmId, availableTickets) {
   const films = movies.filter((movie) => movie.id == filmId);
   films.map((film) => {
+    console.log(film);
+    const constantAvailableTicket = film.capacity - film.tickets_sold;
+
     if (availableTickets > 0) {
-      const updatedAvailableTickets = availableTickets - 1;
+      const updatedAvailableTickets = constantAvailableTicket - 1;
       const tickets = document.querySelector(".tickets");
-      tickets.innerHTML = `Available Tickets: ${updatedAvailableTickets}`;
+      tickets.innerText = `Available Tickets: ${updatedAvailableTickets}`;
       fetch(`${filmsUrl}films/${filmId}`, {
         method: "PATCH",
         headers: {
@@ -81,7 +113,7 @@ function buyTicket(filmId, availableTickets) {
       })
         .then((res) => res.json())
         .then((updatedFilm) => {
-          tickets.innerHTML = `Available Tickets: ${updatedFilm.availableTickets}`;
+          tickets.innerText = `Available Tickets: ${updatedFilm.availableTickets}`;
         })
         .catch((error) => {
           console.error("Error updating ticket information:", error.message);
