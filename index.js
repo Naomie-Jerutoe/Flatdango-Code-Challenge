@@ -131,7 +131,7 @@ function buyTicket(filmId) {
         .then((res) => res.json())
         .then((updatedFilm) => {
           // Update the UI with the new available ticket count from the server response
-          tickets.innerText = `Available Tickets: ${updatedFilm.availableTickets}`;
+          tickets.innerText = `Available Tickets: ${updatedAvailableTickets}`;
 
           // If available tickets are now 0, update the button text to "Sold Out"
           if (updatedAvailableTickets === 0) {
