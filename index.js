@@ -13,7 +13,7 @@ function getAndDisplayFilms() {
         const filmList = document.createElement("li");
         filmList.innerHTML = `<span data-film-id="${film.id}">
         <a href="#" onclick="displayDetails(${film.id})">${film.title}</a>
-        <button onclick="deleteFilm(${film.id})">X</button>
+        <button onclick="deleteFilm(${film.id})">x</button>
         <span>`;
 
         if (film.capacity - film.tickets_sold === 0) {
@@ -28,28 +28,6 @@ function getAndDisplayFilms() {
 }
 
 getAndDisplayFilms();
-
-function deleteFilm(filmId) {
-  fetch(`${filmsUrl}films/${filmId}`, {
-    method: "DELETE",
-  })
-    .then((res) => {
-      if (res.ok) {
-        // Remove the film from the UI
-        const filmListItem = document.querySelector(
-          `li span[data-film-id="${filmId}"]`
-        );
-        if (filmListItem) {
-          filmListItem.parentElement.remove();
-        }
-      } else {
-        console.error("Failed to delete film from the server");
-      }
-    })
-    .catch((error) => {
-      console.error("Error deleting film:", error.message);
-    });
-}
 
 function getandDisplayOneFilm() {
   fetch(`${filmsUrl}films/1`)
@@ -80,52 +58,76 @@ function displayFilmDetails(films) {
               <h3>Runtime: ${film.runtime}</h3>
               <h3>Showtime: ${film.showtime}</h3>
               <h3 class="tickets">Available Tickets: ${availableTickets}</h3>
-              <button type="button" onclick="buyTicket(${film.id}, ${availableTickets})">Buy Ticket</button>
+              <button class="btn" onclick="buyTicket(${film.id})">Buy Ticket</button>
           </div>
       </div>`;
     main.innerHTML = filmDetails;
 
     if (availableTickets === 0) {
-      const button = document.querySelector("button");
+      const button = document.querySelector(".btn");
       button.innerText = "Sold Out";
     }
   });
 }
 
-function buyTicket(filmId, availableTickets) {
+function buyTicket(filmId) {
   const films = movies.filter((movie) => movie.id == filmId);
   films.map((film) => {
-    console.log(film);
-    const constantAvailableTicket = film.capacity - film.tickets_sold;
+    const newAvailableTicket = film.capacity - film.tickets_sold;
+    const newTicketsSold = film.tickets_sold + 1;
 
-    if (availableTickets > 0) {
-      const updatedAvailableTickets = constantAvailableTicket - 1;
+    if (newAvailableTicket > 0) {
+      const updatedAvailableTickets = newAvailableTicket - 1;
+      alert("Ticket bought successfully");
       const tickets = document.querySelector(".tickets");
       tickets.innerText = `Available Tickets: ${updatedAvailableTickets}`;
+
       fetch(`${filmsUrl}films/${filmId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          tickets_sold: film.tickets_sold + 1,
+          tickets_sold: newTicketsSold,
         }),
       })
         .then((res) => res.json())
         .then((updatedFilm) => {
-          tickets.innerText = `Available Tickets: ${updatedFilm.availableTickets}`;
+          tickets.innerText = `Available Tickets: ${updatedAvailableTickets}`;
         })
         .catch((error) => {
           console.error("Error updating ticket information:", error.message);
         });
       if (updatedAvailableTickets === 0) {
-        const button = document.querySelector("button");
+        const button = document.querySelector(".btn");
         button.innerText = "Sold Out";
       }
     } else {
-      const button = document.querySelector("button");
+      const button = document.querySelector(".btn");
       button.innerText = "Sold Out";
       alert("Sorry, this showing is sold out.");
     }
   });
+}
+
+function deleteFilm(filmId) {
+  fetch(`${filmsUrl}films/${filmId}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (res.ok) {
+        // Remove the film from the UI
+        const filmListItem = document.querySelector(
+          `li span[data-film-id="${filmId}"]`
+        );
+        if (filmListItem) {
+          filmListItem.parentElement.remove();
+        }
+      } else {
+        console.error("Failed to delete film from the server");
+      }
+    })
+    .catch((error) => {
+      console.error("Error deleting film:", error.message);
+    });
 }
